@@ -11,8 +11,8 @@ let requestBin = "http://requestb.in/190wskz1?heh=e"
 
 
 do {
-    let request = try Pidgey.POST(requestBin, params: ["hah":"a"], queryParams: ["oh":"o"])
-    request.requestSerializationMode = .JSON
+    let request = try Pidgey.POST(requestBin, params: ["ha h":"a h"], queryParams: ["oh o":"h o"])
+    request.requestSerializationMode = .HTTP
     request.resume({ (data, response, error) in
         print("done!")
     })

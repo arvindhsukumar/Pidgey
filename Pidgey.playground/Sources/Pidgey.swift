@@ -78,18 +78,24 @@ public class PidgeyRequest
     
     public var task: NSURLSessionTask?
     
-    private var originalURL: NSURL!
-    public var urlRequest: NSMutableURLRequest!
+    private var originalURL: NSURL
+    public var urlRequest: NSMutableURLRequest
     
     private var params: [String:AnyObject]?
     private var queryParams: [String: String]?
     
     public var requestSerializationMode: PidgeyRequestSerializationMode = .HTTP
-    public var requestBody: NSData?
     
-    convenience init(url: NSURL, method: HTTPMethod)
+    public var requestBody: NSData? {
+        return urlRequest.HTTPBody
+    }
+    
+    public var taskIdentifier: Int? {
+        return task?.taskIdentifier
+    }
+    
+    init(url: NSURL, method: HTTPMethod)
     {
-        self.init()
         originalURL = url
         urlRequest = NSMutableURLRequest(URL: url)
         urlRequest.HTTPMethod = method.rawValue
@@ -132,7 +138,7 @@ extension PidgeyRequest {
     {
         // TODO: Set content type for form-multipart
         if requestSerializationMode == .HTTP {
-            setHeader("Content-Type", value: "application/x-form-url-encoded")
+            setHeader("Content-Type", value: "application/x-www-form-urlencoded")
         }
         else {
             setHeader("Content-Type", value: "application/json")
@@ -141,8 +147,7 @@ extension PidgeyRequest {
     
     private func setRequestBody()
     {
-        requestBody = serializeParams()
-        urlRequest.HTTPBody = requestBody
+        urlRequest.HTTPBody = serializeParams()
     }
     
     private func setQueryParams()
@@ -185,7 +190,6 @@ extension PidgeyRequest {
         guard let params = params else {return nil}
         
         var components: [(String, String)] = []
-        
         for (key, value) in params {
             components += queryComponentsForParam(key, value: value)
         }
@@ -196,7 +200,6 @@ extension PidgeyRequest {
     private func queryComponentsForParam(key: String, value: AnyObject) -> [(String,String)]
     {
         var components: [(String, String)] = []
-        
         if let dictionary = value as? [String: AnyObject] {
             for (nestedKey, value) in dictionary {
                 components += queryComponentsForParam("\(key)[\(nestedKey)]", value:value)
@@ -206,13 +209,15 @@ extension PidgeyRequest {
                 components += queryComponentsForParam("\(key)", value: value)
             }
         } else {
-//            components.appendContentsOf([(percentEncodeString(key), percentEncodeString("\(value)"))])
-            components.appendContentsOf([(key, "\(value)")])
+            components.appendContentsOf([(percentEncodeString(key), percentEncodeString(value as? String))])
         }
         
         return components
     }
     
+    private func percentEncodeString(string:String?) -> String {
+        return string?.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet()) ?? ""
+    }
 }
 
 public let Pidgey = PidgeyBird.sharedInstance
