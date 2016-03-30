@@ -166,13 +166,15 @@ extension PidgeyRequest {
         }
     }
     
-    private func addHeaders(headers:[String:String]){
+    private func addHeaders(headers:[String:String])
+    {
         for (k,v) in headers {
             setHeader(k, value: v)
         }
     }
 
-    public func setCookies(cookies:[String:String]){
+    public func setCookies(cookies:[String:String])
+    {
         var httpCookies: [NSHTTPCookie] = []
         for (k,v) in cookies {
             if let cookie = NSHTTPCookie(properties: [
@@ -187,6 +189,17 @@ extension PidgeyRequest {
         
         let cookieHeaders = NSHTTPCookie.requestHeaderFieldsWithCookies(httpCookies)
         addHeaders(cookieHeaders)
+    }
+    
+    public func setAuthentication(username username:String, password: String)
+    {
+        let authString = "\(username):\(password)"
+        let utf8str = authString.dataUsingEncoding(NSUTF8StringEncoding)
+        
+        if let base64Encoded = utf8str?.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(rawValue: 0))
+        {
+            setHeader("Authorization", value: "Basic \(base64Encoded)")
+        }
     }
 }
 

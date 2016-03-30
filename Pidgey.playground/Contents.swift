@@ -16,6 +16,13 @@ do {
     request.resume({ (data, response, error) in
         print("done!")
     })
+    
+    let request2 = try Pidgey.GET(requestBin, queryParams: [:])
+    request2.setAuthentication(username: "postman", password: "password")
+    request2.requestSerializationMode = .HTTP
+    request2.resume({ (data, response, error) in
+        print("done 2!")
+    })
 }
 catch{
     print("errorrr!!!!")
