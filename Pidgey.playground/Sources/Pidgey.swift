@@ -10,6 +10,31 @@ public enum HTTPMethod : String{
     case PATCH = "PATCH"
 }
 
+protocol HeaderName {
+    static var headerName: String {get}
+}
+
+public enum Header {
+    enum ContentType: String, HeaderName {
+        static var headerName: String {return "Content-Type"}
+        
+        case JSON = "application/json"
+        case Form = "application/x-www-form-urlencoded"
+    
+    }
+    
+    enum Accept: String, HeaderName {
+        static var headerName: String {return "Accept"}
+        case JSON = "application/json"
+        case XML = "application/xml"
+        case Text = "application/text"
+    }
+    
+    enum Authorization: HeaderName {
+        static var headerName: String {return "Authorization"}
+    }
+}
+
 public enum Result<T> {
     case Success(T)
     case Failure(ErrorType)
@@ -125,10 +150,10 @@ extension PidgeyRequest {
     {
         // TODO: Set content type for form-multipart
         if requestSerializationMode == .HTTP {
-            setHeader("Content-Type", value: "application/x-www-form-urlencoded")
+            setHeader(Header.ContentType.headerName, value: Header.ContentType.JSON.rawValue)
         }
         else {
-            setHeader("Content-Type", value: "application/json")
+            setHeader(Header.ContentType.headerName, value: Header.ContentType.Form.rawValue)
         }
     }
     
@@ -198,7 +223,7 @@ extension PidgeyRequest {
         
         if let base64Encoded = utf8str?.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(rawValue: 0))
         {
-            setHeader("Authorization", value: "Basic \(base64Encoded)")
+            setHeader(Header.Authorization.headerName, value: "Basic \(base64Encoded)")
         }
     }
 }
