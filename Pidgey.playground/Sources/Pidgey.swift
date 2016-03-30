@@ -86,7 +86,7 @@ public class PidgeyRequest
     
     public var requestSerializationMode: PidgeyRequestSerializationMode = .HTTP
     
-    public var requestBody: NSData? {
+    private var requestBody: NSData? {
         return urlRequest.HTTPBody
     }
     
@@ -117,19 +117,6 @@ public class PidgeyRequest
         task?.resume()
     }
     
-    public func setHeader(header: String, value: String)
-    {
-        urlRequest.setValue(value, forHTTPHeaderField: header)
-    }
-    
-    public func setHeaders(headers:[String:String])
-    {
-        urlRequest.allHTTPHeaderFields = nil
-        
-        for (key, value) in headers {
-            setHeader(key, value: value)
-        }
-    }
 }
 
 extension PidgeyRequest {
@@ -165,7 +152,42 @@ extension PidgeyRequest {
         
         urlRequest.URL = components?.URL
     }
+    
+    public func setHeader(header: String, value: String)
+    {
+        urlRequest.setValue(value, forHTTPHeaderField: header)
+    }
+    
+    public func setHeaders(headers:[String:String])
+    {
+        urlRequest.allHTTPHeaderFields = nil
+        for (key, value) in headers {
+            setHeader(key, value: value)
+        }
+    }
+    
+    private func addHeaders(headers:[String:String]){
+        for (k,v) in headers {
+            setHeader(k, value: v)
+        }
+    }
 
+    public func setCookies(cookies:[String:String]){
+        var httpCookies: [NSHTTPCookie] = []
+        for (k,v) in cookies {
+            if let cookie = NSHTTPCookie(properties: [
+                NSHTTPCookieName: k,
+                NSHTTPCookieValue: v,
+                NSHTTPCookieOriginURL: self.originalURL,
+                NSHTTPCookiePath: "/"
+            ]) {
+                httpCookies.append(cookie)
+            }
+        }
+        
+        let cookieHeaders = NSHTTPCookie.requestHeaderFieldsWithCookies(httpCookies)
+        addHeaders(cookieHeaders)
+    }
 }
 
 extension PidgeyRequest {
@@ -206,7 +228,7 @@ extension PidgeyRequest {
             }
         } else if let array = value as? [AnyObject] {
             for value in array {
-                components += queryComponentsForParam("\(key)", value: value)
+                components += queryComponentsForParam("\(key)[]", value: value)
             }
         } else {
             components.appendContentsOf([(percentEncodeString(key), percentEncodeString(value as? String))])
