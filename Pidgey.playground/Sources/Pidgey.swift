@@ -149,7 +149,7 @@ extension PidgeyRequest {
     private func setContentType()
     {
         // TODO: Set content type for form-multipart
-        if requestSerializationMode == .HTTP {
+        if requestSerializationMode == .JSON {
             setHeader(Header.ContentType.headerName, value: Header.ContentType.JSON.rawValue)
         }
         else {
