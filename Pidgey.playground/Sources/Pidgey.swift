@@ -99,22 +99,19 @@ public enum PidgeyRequestSerializationMode {
 
 public class PidgeyRequest
 {
-    private weak var pidgey: PidgeyBird!
-    
-    public var task: NSURLSessionTask?
+    private weak var pidgey: PidgeyBird?
     
     private var originalURL: NSURL
     public var urlRequest: NSMutableURLRequest
-    
+    public var task: NSURLSessionTask?
+
     private var params: [String:AnyObject]?
     private var queryParams: [String: String]?
     
     public var requestSerializationMode: PidgeyRequestSerializationMode = .HTTP
-    
     private var requestBody: NSData? {
         return urlRequest.HTTPBody
     }
-    
     public var taskIdentifier: Int? {
         return task?.taskIdentifier
     }
@@ -126,17 +123,17 @@ public class PidgeyRequest
         urlRequest.HTTPMethod = method.rawValue
     }
     
-    public func resume(completion:(data:NSData?, response:NSURLResponse?, error:NSError?)->())
+    public func resume(completion:(response:PidgeyResponse?, error:NSError?)->())
     {
         setQueryParams()
         setRequestBody()
         setContentType()
         
-        let session = pidgey.session
-        task = session.dataTaskWithRequest(urlRequest, completionHandler: { (data:NSData?, response:NSURLResponse?, error:NSError?) in
+        let session = pidgey?.session
+        task = session?.dataTaskWithRequest(urlRequest, completionHandler: { (data:NSData?, response:NSURLResponse?, error:NSError?) in
+            let pidgeyResponse = PidgeyResponse(request: self, data: data, urlResponse: response as? NSHTTPURLResponse)
             
-            completion(data:data, response:response, error:error)
-            
+            completion(response:pidgeyResponse, error:error)
         })
         
         task?.resume()
@@ -277,6 +274,33 @@ extension PidgeyRequest {
     
     private func percentEncodeString(string:String?) -> String {
         return string?.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet()) ?? ""
+    }
+}
+
+public struct PidgeyResponse {
+    private weak var request: PidgeyRequest?
+    public var urlResponse: NSHTTPURLResponse?
+    public var data: NSData?
+    public var json: AnyObject? {
+        if let data = data {
+            return try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions(rawValue: 0))
+        }
+        return nil
+    }
+    public var text: String? {
+        if let data = data {
+            return String(data: data, encoding: NSUTF8StringEncoding)
+        }
+        return nil
+    }
+    public var statusCode: Int? {
+        return urlResponse?.statusCode
+    }
+    
+    init(request: PidgeyRequest, data: NSData?, urlResponse: NSHTTPURLResponse?) {
+        self.data = data
+        self.urlResponse = urlResponse
+        self.request = request
     }
 }
 
