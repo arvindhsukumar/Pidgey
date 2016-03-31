@@ -8,6 +8,16 @@ public enum HTTPMethod : String{
     case HEAD = "HEAD"
     case OPTIONS = "OPTIONS"
     case PATCH = "PATCH"
+    
+    public func contentTypeRequired() -> Bool
+    {
+        switch self {
+        case .GET, .HEAD, .DELETE:
+            return false
+        default:
+            return true
+        }
+    }
 }
 
 protocol HeaderName {
@@ -170,6 +180,9 @@ extension PidgeyRequest {
     private func setContentType()
     {
         // TODO: Set content type for form-multipart
+        if let method = HTTPMethod(rawValue: urlRequest.HTTPMethod) where method.contentTypeRequired() {
+            return
+        }
         if requestSerializationMode == .JSON {
             setHeader(Header.ContentType.headerName, value: Header.ContentType.JSON.rawValue)
         }
