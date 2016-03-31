@@ -6,7 +6,7 @@ public enum HTTPMethod : String{
     case PUT = "PUT"
     case DELETE = "DELETE"
     case HEAD = "HEAD"
-    case OPTION = "OPTION"
+    case OPTIONS = "OPTIONS"
     case PATCH = "PATCH"
 }
 
@@ -85,9 +85,33 @@ public class PidgeyBird: NSObject {
         return request
     }
     
+    public func HEAD(url:String, queryParams:[String:String]?) throws -> PidgeyRequest
+    {
+        let request = try self.request(url, method: .HEAD, params:nil,queryParams:queryParams)
+        return request
+    }
+    
+    public func OPTIONS(url:String, queryParams:[String:String]?) throws -> PidgeyRequest
+    {
+        let request = try self.request(url, method: .OPTIONS, params:nil,queryParams:queryParams)
+        return request
+    }
+
     public func POST(url:String, params:[String:AnyObject], queryParams:[String:String]? = nil) throws -> PidgeyRequest
     {
         let request = try self.request(url, method: .POST, params: params, queryParams:queryParams)
+        return request
+    }
+    
+    public func PUT(url:String, params:[String:AnyObject], queryParams:[String:String]? = nil) throws -> PidgeyRequest
+    {
+        let request = try self.request(url, method: .PUT, params: params, queryParams:queryParams)
+        return request
+    }
+    
+    public func DELETE(url:String, params:[String:AnyObject], queryParams:[String:String]? = nil) throws -> PidgeyRequest
+    {
+        let request = try self.request(url, method: .DELETE, params: params, queryParams:queryParams)
         return request
     }
 }
@@ -171,7 +195,6 @@ extension PidgeyRequest {
         var existingQueryItems = components?.queryItems ?? []
         existingQueryItems.appendContentsOf(newQueryItems)
         components?.queryItems = existingQueryItems
-        
         urlRequest.URL = components?.URL
     }
     
@@ -295,6 +318,9 @@ public struct PidgeyResponse {
     }
     public var statusCode: Int? {
         return urlResponse?.statusCode
+    }
+    public var headers: [String: String]{
+        return urlResponse?.allHeaderFields as? [String: String] ?? [:]
     }
     
     init(request: PidgeyRequest, data: NSData?, urlResponse: NSHTTPURLResponse?) {
