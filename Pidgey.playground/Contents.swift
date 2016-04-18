@@ -7,7 +7,7 @@ import XCPlayground
 XCPlaygroundPage.currentPage.needsIndefiniteExecution = true
 
 var str = "Hello, playground"
-let requestBin = "http://requestb.in/xv88axxv"
+let requestBin = "http://requestb.in/19ud9up1"
 
 
 do {
@@ -22,11 +22,12 @@ do {
     request2.requestSerializationMode = .HTTP
     request2.resume({ (response: PidgeyResponse?, error: NSError?) in
         print(response?.headers)
+        print(error)
     })
+    
+    Pidgey.cancelAllRequests()
 }
 catch{
     print("errorrr!!!!")
 }
-
-
 

@@ -30,7 +30,7 @@ public enum Header {
         
         case JSON = "application/json"
         case Form = "application/x-www-form-urlencoded"
-    
+        
     }
     
     enum Accept: String, HeaderName {
@@ -107,7 +107,7 @@ public class PidgeyBird: NSObject {
         let request = try self.request(url, method: .OPTIONS, params:nil,queryParams:queryParams)
         return request
     }
-
+    
     public func POST(url:String, params:[String:AnyObject], queryParams:[String:String]? = nil) throws -> PidgeyRequest
     {
         let request = try self.request(url, method: .POST, params: params, queryParams:queryParams)
@@ -152,7 +152,7 @@ public class PidgeyRequest
     private var originalURL: NSURL
     public var urlRequest: NSMutableURLRequest
     public var task: NSURLSessionTask?
-
+    
     private var params: [String:AnyObject]?
     private var queryParams: [String: String]?
     
@@ -256,7 +256,7 @@ extension PidgeyRequest {
             setHeader(k, value: v)
         }
     }
-
+    
     public func setCookies(cookies:[String:String])
     {
         var httpCookies: [NSHTTPCookie] = []
@@ -266,7 +266,7 @@ extension PidgeyRequest {
                 NSHTTPCookieValue: v,
                 NSHTTPCookieOriginURL: self.originalURL,
                 NSHTTPCookiePath: "/"
-            ]) {
+                ]) {
                 httpCookies.append(cookie)
             }
         }
